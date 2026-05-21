@@ -1,0 +1,39 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+
+metadata:
+  name: ${{ values.repo_name }}
+  title: ${{ values.environment }} GCP Infrastructure
+  description: Terraform code for provisioning GCP infrastructure on Google Cloud
+
+  annotations:
+    github.com/project-slug: Backstage-IDP-PoC/${{ values.repo_name }}
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/source-location: url:https://github.com/Backstage-IDP-PoC/${{ values.repo_name }}
+
+  tags:
+    - compute
+    - storage
+    - networking
+
+  links:
+    - url: https://console.cloud.google.com/storage/browser/${{ values.environment }}-${{ values.bucket_name }}
+      title: GCP Storage Bucket
+      icon: cloud
+
+    - url: https://console.cloud.google.com/compute/instances
+      title: Compute Engine Instances
+      icon: dashboard
+
+    - url: https://console.cloud.google.com/networking/networks/list
+      title: VPC Networks
+      icon: dashboard
+
+    - url: https://github.com/Backstage-IDP-PoC/${{ values.repo_name }}
+      title: GitHub Repository
+      icon: github
+
+spec:
+  type: infrastructure
+  lifecycle: experimental
+  owner: development

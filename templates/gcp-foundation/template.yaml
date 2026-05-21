@@ -1,0 +1,151 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+
+metadata:
+  name: gcp-infrastructure
+  title: GCP Infrastructure Provisioning
+  description: Provision Google Cloud infrastructure using Terraform
+  tags:
+    - gcp
+    - terraform
+    - infrastructure
+    - compute
+    - storage
+    - networking
+
+spec:
+  owner: development
+  type: infrastructure
+
+  parameters:
+    - title: GCP Infrastructure Configuration
+      required:
+        - project_id
+        - environment
+        - region
+        - zone
+        - bucket_name
+        - repo_name
+        - vpc_name
+        - subnet_name
+        - subnet_cidr
+        - vm_name
+        - machine_type
+
+      properties:
+        project_id:
+          type: string
+          title: GCP Project ID
+          description: GCP project where services will be created
+
+        environment:
+          type: string
+          title: Target Environment
+          description: Select the deployment environment
+          default: dev
+          enum:
+            - dev
+            - qa
+            - uat
+            - prod
+
+        region:
+          type: string
+          title: GCP Region
+          default: us-central1
+          enum:
+            - us-central1
+            - us-east1
+            - asia-south1
+            - asia-southeast1
+            - europe-west1
+
+        zone:
+          type: string
+          title: GCP Zone
+          default: us-central1-a
+          enum:
+            - us-central1-a
+            - us-central1-b
+            - us-east1-b
+            - asia-south1-a
+
+        vpc_name:
+          type: string
+          title: VPC Name
+
+        subnet_name:
+          type: string
+          title: Subnet Name
+
+        subnet_cidr:
+          type: string
+          title: Subnet CIDR
+          default: 10.10.0.0/24
+
+        vm_name:
+          type: string
+          title: VM Name
+
+        machine_type:
+          type: string
+          title: Machine Type
+          description: Select the Compute Engine machine type
+          default: e2-micro
+          enum:
+            - e2-micro
+            - e2-small
+            - e2-medium
+
+        bucket_name:
+          type: string
+          title: GCS Bucket Name
+          description: Must be globally unique
+
+        repo_name:
+          type: string
+          title: GitHub Repository Name
+          description: Repository to create for Terraform code
+          default: gcp-infrastructure
+
+  steps:
+    - id: fetch-base
+      name: Generate Terraform Files
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          project_id: ${{ parameters.project_id }}
+          environment: ${{ parameters.environment }}
+          region: ${{ parameters.region }}
+          zone: ${{ parameters.zone }}
+          bucket_name: ${{ parameters.bucket_name }}
+          vpc_name: ${{ parameters.vpc_name }}
+          subnet_name: ${{ parameters.subnet_name }}
+          subnet_cidr: ${{ parameters.subnet_cidr }}
+          vm_name: ${{ parameters.vm_name }}
+          machine_type: ${{ parameters.machine_type }}
+          repo_name: ${{ parameters.repo_name }}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        repoUrl: github.com?owner=Backstage-IDP-PoC&repo=${{ parameters.repo_name }}
+        defaultBranch: main
+        description: Terraform code for provisioning GCP infrastructure
+
+    - id: register
+      name: Register in Backstage Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: /catalog-info.yaml
+
+  output:
+    links:
+      - title: GitHub Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+
+      - title: Open in Backstage Catalog
+        entityRef: ${{ steps.register.output.entityRef }}

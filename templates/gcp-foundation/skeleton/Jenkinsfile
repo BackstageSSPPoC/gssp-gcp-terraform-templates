@@ -1,0 +1,157 @@
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
+  environment {
+    TF_IN_AUTOMATION = 'true'
+    TF_INPUT         = 'false'
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Verify Environment') {
+      steps {
+        sh '''
+          echo "====================================="
+          echo "Current Working Directory:"
+          pwd
+
+          echo "====================================="
+          echo "Repository Files:"
+          ls -la
+
+          echo "====================================="
+          echo "Terraform Files:"
+          ls -la *.tf || true
+        '''
+      }
+    }
+
+    stage('Verify GCP Authentication') {
+      steps {
+        sh '''
+          echo "====================================="
+          echo "Active GCP Account:"
+          gcloud auth list --filter=status:ACTIVE --format="value(account)"
+
+          echo "====================================="
+          echo "Current GCP Project:"
+          gcloud config get-value project || true
+        '''
+      }
+    }
+
+    stage('Terraform Version') {
+      steps {
+        sh '''
+          echo "====================================="
+          echo "Terraform Version:"
+          terraform version
+        '''
+      }
+    }
+
+    stage('Terraform Format Check') {
+      steps {
+        sh '''
+          echo "====================================="
+          echo "Checking Terraform Formatting..."
+          terraform fmt -check -recursive
+        '''
+      }
+    }
+
+    stage('Terraform Init') {
+      steps {
+        sh '''
+          echo "====================================="
+          echo "Initializing Terraform..."
+          terraform init
+        '''
+      }
+    }
+
+    stage('Terraform Validate') {
+      steps {
+        sh '''
+          echo "====================================="
+          echo "Validating Terraform..."
+          terraform validate
+        '''
+      }
+    }
+
+    stage('Terraform Plan') {
+      steps {
+        sh '''
+          echo "====================================="
+          echo "Generating Terraform Plan..."
+          terraform plan -out=tfplan
+        '''
+      }
+    }
+
+    // Uncomment for manual approval in future
+    /*
+    stage('Approve Apply') {
+      steps {
+        input message: 'Approve Terraform Apply?'
+      }
+    }
+    */
+
+    stage('Terraform Apply') {
+      steps {
+        sh '''
+          echo "====================================="
+          echo "Applying Terraform Changes..."
+          terraform apply -auto-approve tfplan
+        '''
+      }
+    }
+
+    stage('Terraform Outputs') {
+      steps {
+        sh '''
+          echo "====================================="
+          echo "Terraform Outputs:"
+          terraform output || true
+        '''
+      }
+    }
+  }
+
+  post {
+
+    success {
+      echo '====================================='
+      echo 'Terraform infrastructure provisioned successfully.'
+    }
+
+    failure {
+      echo '====================================='
+      echo 'Terraform pipeline failed.'
+    }
+
+    always {
+      archiveArtifacts artifacts: 'tfplan', allowEmptyArchive: true
+
+      sh '''
+        echo "====================================="
+        echo "Terraform State List:"
+        terraform state list || true
+      '''
+    }
+  }
+}
