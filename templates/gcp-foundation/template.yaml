@@ -131,7 +131,7 @@ spec:
       name: Publish to GitHub
       action: publish:github
       input:
-        repoUrl: github.com?owner=Backstage-IDP-PoC&repo=${{ parameters.repo_name }}
+        repoUrl: github.com?owner=Backstage-IDP-PoC&repo=${{ parameters.repo_name }}       #Replace with your own GitHub Organization's name here at Line no 134
         defaultBranch: main
         description: Terraform code for provisioning GCP infrastructure
 
