@@ -7,10 +7,10 @@ metadata:
   description: Terraform code for provisioning GCP infrastructure on Google Cloud
 
   annotations:
-    github.com/project-slug: Backstage-IDP-PoC/${{ values.repo_name }}
+    github.com/project-slug: Backstage-IDP-PoC/${{ values.repo_name }}                       #Add your GitHub Organization's name here at Line no 10
     backstage.io/techdocs-ref: dir:.
-    backstage.io/source-location: url:https://github.com/Backstage-IDP-PoC/${{ values.repo_name }}
-    jenkins.io/job-full-name: Backstage_PoC/${{ values.repo_name }}/main
+    backstage.io/source-location: url:https://github.com/Backstage-IDP-PoC/${{ values.repo_name }}                   #Add your GitHub Organization's name here at Line no 12
+    jenkins.io/job-full-name: Backstage_PoC/${{ values.repo_name }}/main                  #Add your Jenkins Organization's Name here Line no. 13
 
   tags:
     - gcp
@@ -33,7 +33,7 @@ metadata:
       title: VPC Networks
       icon: dashboard
 
-    - url: https://github.com/Backstage-IDP-PoC/${{ values.repo_name }}
+    - url: https://github.com/Backstage-IDP-PoC/${{ values.repo_name }}                  #Add your GitHub Organization's name here at Line no 36
       title: GitHub Repository
       icon: github
 
