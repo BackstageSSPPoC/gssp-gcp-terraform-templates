@@ -10,14 +10,15 @@ metadata:
     github.com/project-slug: Backstage-IDP-PoC/${{ values.repo_name }}
     backstage.io/techdocs-ref: dir:.
     backstage.io/source-location: url:https://github.com/Backstage-IDP-PoC/${{ values.repo_name }}
-    jenkins.io/job-full-name: Backstage_PoC_${{ values.repo_name }}_main
+    jenkins.io/job-full-name: Backstage_PoC/${{ values.repo_name }}/main
 
   tags:
+    - gcp
     - compute
     - storage
     - networking
     - terraform
-    - gcp
+    
 
   links:
     - url: https://console.cloud.google.com/storage/browser/${{ values.environment }}-${{ values.bucket_name }}
