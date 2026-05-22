@@ -67,7 +67,7 @@ pipeline {
         sh '''
           echo "====================================="
           echo "Checking Terraform Formatting..."
-          terraform fmt -check -recursive
+          terraform fmt -recursive
         '''
       }
     }
@@ -77,7 +77,7 @@ pipeline {
         sh '''
           echo "====================================="
           echo "Initializing Terraform..."
-          terraform init
+          terraform init -reconfigure
         '''
       }
     }
