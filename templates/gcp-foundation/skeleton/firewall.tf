@@ -1,6 +1,7 @@
 resource "google_compute_firewall" "allow_ssh" {
-  name    = "${var.vpc_name}-allow-ssh"
-  network = google_compute_network.vpc.name
+  name = "${var.environment}-allow-ssh"
+
+  network = var.use_existing_vpc ? data.google_compute_network.existing_vpc[0].name : google_compute_network.vpc[0].name
 
   allow {
     protocol = "tcp"
@@ -8,4 +9,6 @@ resource "google_compute_firewall" "allow_ssh" {
   }
 
   source_ranges = ["0.0.0.0/0"]
+
+  target_tags = ["ssh"]
 }
