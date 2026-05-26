@@ -26,13 +26,15 @@ spec:
         - zone
         - bucket_name
         - repo_name
-        - vpc_name
-        - subnet_name
-        - subnet_cidr
         - vm_name
         - machine_type
 
       properties:
+
+        ########################################
+        # PROJECT CONFIGURATION
+        ########################################
+
         project_id:
           type: string
           title: GCP Project ID
@@ -48,6 +50,10 @@ spec:
             - qa
             - uat
             - prod
+
+        ########################################
+        # REGION / ZONE
+        ########################################
 
         region:
           type: string
@@ -70,18 +76,48 @@ spec:
             - us-east1-b
             - asia-south1-a
 
+        ########################################
+        # EXISTING VPC REUSE OPTION
+        ########################################
+
+        use_existing_vpc:
+          type: boolean
+          title: Use Existing VPC
+          description: Reuse an existing VPC instead of creating a new one
+          default: false
+
+        existing_vpc_name:
+          type: string
+          title: Existing VPC Name
+          description: Existing VPC name to reuse
+
+        existing_subnet_name:
+          type: string
+          title: Existing Subnet Name
+          description: Existing subnet name to reuse
+
+        ########################################
+        # NEW VPC CONFIGURATION
+        ########################################
+
         vpc_name:
           type: string
           title: VPC Name
+          description: New VPC name (used only when creating new VPC)
 
         subnet_name:
           type: string
           title: Subnet Name
+          description: New subnet name (used only when creating new subnet)
 
         subnet_cidr:
           type: string
           title: Subnet CIDR
           default: 10.10.0.0/24
+
+        ########################################
+        # COMPUTE ENGINE
+        ########################################
 
         vm_name:
           type: string
@@ -97,10 +133,18 @@ spec:
             - e2-small
             - e2-medium
 
+        ########################################
+        # STORAGE
+        ########################################
+
         bucket_name:
           type: string
           title: GCS Bucket Name
           description: Must be globally unique
+
+        ########################################
+        # GITHUB REPOSITORY
+        ########################################
 
         repo_name:
           type: string
@@ -114,24 +158,33 @@ spec:
       action: fetch:template
       input:
         url: ./skeleton
+
         values:
           project_id: ${{ parameters.project_id }}
           environment: ${{ parameters.environment }}
           region: ${{ parameters.region }}
           zone: ${{ parameters.zone }}
+
+          use_existing_vpc: ${{ parameters.use_existing_vpc }}
+          existing_vpc_name: ${{ parameters.existing_vpc_name }}
+          existing_subnet_name: ${{ parameters.existing_subnet_name }}
+
           bucket_name: ${{ parameters.bucket_name }}
+
           vpc_name: ${{ parameters.vpc_name }}
           subnet_name: ${{ parameters.subnet_name }}
           subnet_cidr: ${{ parameters.subnet_cidr }}
+
           vm_name: ${{ parameters.vm_name }}
           machine_type: ${{ parameters.machine_type }}
+
           repo_name: ${{ parameters.repo_name }}
 
     - id: publish
       name: Publish to GitHub
       action: publish:github
       input:
-        repoUrl: github.com?owner=Backstage-IDP-PoC&repo=${{ parameters.repo_name }}       #Replace with your own GitHub Organization's name here at Line no 134
+        repoUrl: github.com?owner=Backstage-IDP-PoC&repo=${{ parameters.repo_name }}
         defaultBranch: main
         description: Terraform code for provisioning GCP infrastructure
 

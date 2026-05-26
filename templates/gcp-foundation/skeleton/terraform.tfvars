@@ -1,13 +1,42 @@
+########################################
+# PROJECT CONFIGURATION
+########################################
+
 project_id   = "${{ values.project_id }}"
 environment  = "${{ values.environment }}"
+
+########################################
+# REGION / ZONE
+########################################
+
 region       = "${{ values.region }}"
 zone         = "${{ values.zone }}"
 
-bucket_name  = "${{ values.bucket_name }}"
+########################################
+# EXISTING VPC REUSE
+########################################
+
+use_existing_vpc     = ${{ values.use_existing_vpc }}
+existing_vpc_name    = "${{ values.existing_vpc_name }}"
+existing_subnet_name = "${{ values.existing_subnet_name }}"
+
+########################################
+# NEW NETWORK CONFIGURATION
+########################################
 
 vpc_name     = "${{ values.vpc_name }}"
 subnet_name  = "${{ values.subnet_name }}"
 subnet_cidr  = "${{ values.subnet_cidr }}"
 
+########################################
+# COMPUTE ENGINE
+########################################
+
 vm_name      = "${{ values.vm_name }}"
 machine_type = "${{ values.machine_type }}"
+
+########################################
+# STORAGE
+########################################
+
+bucket_name  = "${{ values.bucket_name }}"
