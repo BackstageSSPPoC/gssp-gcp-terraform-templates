@@ -40,6 +40,11 @@ spec:
           title: GCP Project ID
           description: GCP project where services will be created
 
+       app_name:                               
+          type: string
+          title: Application Name
+          description: Unique application name (used to avoid resource name conflicts across projects)
+
         environment:
           type: string
           title: Target Environment
@@ -161,6 +166,7 @@ spec:
 
         values:
           project_id: ${{ parameters.project_id }}
+          app_name: ${{ parameters.app_name }} 
           environment: ${{ parameters.environment }}
           region: ${{ parameters.region }}
           zone: ${{ parameters.zone }}
