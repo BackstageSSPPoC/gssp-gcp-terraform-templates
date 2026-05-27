@@ -195,11 +195,9 @@ pipeline {
           echo "Verifying build environment..."
           echo "Working Directory:"
           pwd
-
           echo "====================================="
           echo "Repository Contents:"
           ls -la
-
           echo "====================================="
           echo "Terraform Configuration Files:"
           ls -la *.tf || true
@@ -212,10 +210,8 @@ pipeline {
         sh '''
           echo "====================================="
           echo "Verifying GCP authentication..."
-
           echo "Active GCP Service Account:"
           gcloud auth list --filter=status:ACTIVE --format="value(account)"
-
           echo "====================================="
           echo "Active GCP Project:"
           gcloud config get-value project || true
@@ -338,7 +334,6 @@ pipeline {
             }
           } catch (err) {
             currentBuild.result = 'ABORTED'
-            echo "====================================="
             echo "Destroy approval not received. Infrastructure resources are still active."
             echo "Please destroy resources manually to avoid unnecessary costs."
             error('Destroy stage was not approved. Pipeline aborted.')
@@ -371,7 +366,6 @@ pipeline {
     }
 
     failure {
-      // ✅ node block ke andar rakho sh step ko
       node('') {
         echo '====================================='
         echo 'Pipeline execution failed.'
@@ -394,17 +388,11 @@ pipeline {
         echo '====================================='
         echo 'Archiving build artifacts...'
         archiveArtifacts artifacts: 'tfplan', allowEmptyArchive: true
-
-        sh '''
-          echo "====================================="
-          echo "Current Terraform State Summary:"
-          terraform state list || true
-          echo "====================================="
-          echo "Build post-processing complete. Cleaning workspace..."
-        '''
-
+        echo '====================================='
+        echo 'Build post-processing complete. Cleaning workspace...'
         cleanWs()
       }
     }
+
   }
 }
