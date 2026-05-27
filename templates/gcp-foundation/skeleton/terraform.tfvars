@@ -3,6 +3,7 @@
 ########################################
 
 project_id   = "${{ values.project_id }}"
+app_name     = "${{ values.app_name }}"
 environment  = "${{ values.environment }}"
 
 ########################################
