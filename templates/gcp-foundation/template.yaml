@@ -147,6 +147,31 @@ spec:
           title: GCS Bucket Name
           description: Must be globally unique
 
+
+        ########################################
+        # RESOURCE SELECTION       ← YAHAN ADD KARO
+        ########################################
+
+        create_vpc:
+          type: boolean
+          title: Create VPC & Subnet
+          default: false
+
+        create_firewall:
+          type: boolean
+          title: Create Firewall Rule
+          default: false
+
+        create_vm:
+          type: boolean
+          title: Create VM Instance
+          default: false
+
+        create_bucket:
+          type: boolean
+          title: Create GCS Bucket
+          default: false
+
         ########################################
         # GITHUB REPOSITORY
         ########################################
@@ -177,6 +202,11 @@ spec:
 
           vm_name: ${{ parameters.vm_name }}
           machine_type: ${{ parameters.machine_type }}
+
+          create_vpc: ${{ parameters.create_vpc }}
+          create_firewall: ${{ parameters.create_firewall }}
+          create_vm: ${{ parameters.create_vm }}
+          create_bucket: ${{ parameters.create_bucket }}
 
           repo_name: ${{ parameters.app_name }}
 

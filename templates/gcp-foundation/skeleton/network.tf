@@ -4,17 +4,11 @@
 
 data "google_compute_network" "existing_vpc" {
   count = var.use_existing_vpc ? 1 : 0
-
-  name = var.existing_vpc_name
+  name  = var.existing_vpc_name
 }
 
-########################################
-# EXISTING SUBNET
-########################################
-
 data "google_compute_subnetwork" "existing_subnet" {
-  count = var.use_existing_vpc ? 1 : 0
-
+  count  = var.use_existing_vpc ? 1 : 0
   name   = var.existing_subnet_name
   region = var.region
 }
@@ -24,9 +18,9 @@ data "google_compute_subnetwork" "existing_subnet" {
 ########################################
 
 resource "google_compute_network" "vpc" {
-  count = var.use_existing_vpc ? 0 : 1
+  count = var.create_vpc ? 1 : 0              # ✅ create_vpc se control
 
-  name                    = "${var.environment}-${var.vpc_name}"
+  name                    = lower("${var.environment}-${var.app_name}-vpc")
   auto_create_subnetworks = false
 }
 
@@ -35,9 +29,9 @@ resource "google_compute_network" "vpc" {
 ########################################
 
 resource "google_compute_subnetwork" "subnet" {
-  count = var.use_existing_vpc ? 0 : 1
+  count = var.create_vpc ? 1 : 0              # ✅ create_vpc se control
 
-  name          = "${var.environment}-${var.subnet_name}"
+  name          = lower("${var.environment}-${var.app_name}-subnet")
   ip_cidr_range = var.subnet_cidr
   region        = var.region
   network       = google_compute_network.vpc[0].id

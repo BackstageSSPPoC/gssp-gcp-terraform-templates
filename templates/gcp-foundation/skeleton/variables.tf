@@ -94,3 +94,28 @@ variable "bucket_name" {
   description = "GCS bucket name"
   type        = string
 }
+
+
+variable "create_vpc" {
+  description = "VPC aur Subnet create karna hai?"
+  type        = bool
+  default     = false
+}
+
+variable "create_firewall" {
+  description = "Firewall rule create karna hai?"
+  type        = bool
+  default     = false
+}
+
+variable "create_vm" {
+  description = "VM create karna hai?"
+  type        = bool
+  default     = false
+}
+
+variable "create_bucket" {
+  description = "GCS Bucket create karna hai?"
+  type        = bool
+  default     = false
+}

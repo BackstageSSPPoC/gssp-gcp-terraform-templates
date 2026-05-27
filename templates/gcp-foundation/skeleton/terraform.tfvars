@@ -41,3 +41,8 @@ machine_type = "${{ values.machine_type }}"
 ########################################
 
 bucket_name  = "${{ values.bucket_name }}"
+
+create_vpc      = ${{ values.create_vpc }}
+create_firewall = ${{ values.create_firewall }}
+create_vm       = ${{ values.create_vm }}
+create_bucket   = ${{ values.create_bucket }}

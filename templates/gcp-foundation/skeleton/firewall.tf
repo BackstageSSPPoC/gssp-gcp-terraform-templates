@@ -1,5 +1,5 @@
 resource "google_compute_firewall" "allow_ssh" {
-  count = var.use_existing_vpc ? 0 : 1
+  count = var.create_firewall ? 1 : 0  
 
   name = "${var.environment}-${var.app_name}-allow-ssh"
 
