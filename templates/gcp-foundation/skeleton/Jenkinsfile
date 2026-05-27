@@ -179,7 +179,6 @@ pipeline {
   environment {
     TF_IN_AUTOMATION   = 'true'
     TF_INPUT           = 'false'
-    GOOGLE_CREDENTIALS = credentials('gcp-sa-key')
   }
 
   stages {
