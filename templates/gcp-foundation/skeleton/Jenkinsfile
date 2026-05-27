@@ -1,3 +1,171 @@
+// pipeline {
+//   agent any
+
+//   options {
+//     timestamps()
+//     disableConcurrentBuilds()
+//     buildDiscarder(logRotator(numToKeepStr: '20'))
+//   }
+
+//   environment {
+//     TF_IN_AUTOMATION = 'true'
+//     TF_INPUT         = 'false'
+//   }
+
+//   stages {
+
+//     stage('Checkout') {
+//       steps {
+//         checkout scm
+//       }
+//     }
+
+//     stage('Verify Environment') {
+//       steps {
+//         sh '''
+//           echo "====================================="
+//           echo "Current Working Directory:"
+//           pwd
+
+//           echo "====================================="
+//           echo "Repository Files:"
+//           ls -la
+
+//           echo "====================================="
+//           echo "Terraform Files:"
+//           ls -la *.tf || true
+//         '''
+//       }
+//     }
+
+//     stage('Verify GCP Authentication') {
+//       steps {
+//         sh '''
+//           echo "====================================="
+//           echo "Active GCP Account:"
+//           gcloud auth list --filter=status:ACTIVE --format="value(account)"
+
+//           echo "====================================="
+//           echo "Current GCP Project:"
+//           gcloud config get-value project || true
+//         '''
+//       }
+//     }
+
+//     stage('Terraform Version') {
+//       steps {
+//         sh '''
+//           echo "====================================="
+//           echo "Terraform Version:"
+//           terraform version
+//         '''
+//       }
+//     }
+
+//     stage('Terraform Format Check') {
+//       steps {
+//         sh '''
+//           echo "====================================="
+//           echo "Checking Terraform Formatting..."
+//           terraform fmt -recursive
+//         '''
+//       }
+//     }
+
+//     stage('Terraform Init') {
+//       steps {
+//         sh '''
+//           echo "====================================="
+//           echo "Initializing Terraform..."
+//           terraform init -reconfigure
+//         '''
+//       }
+//     }
+
+//     stage('Terraform Validate') {
+//       steps {
+//         sh '''
+//           echo "====================================="
+//           echo "Validating Terraform..."
+//           terraform validate
+//         '''
+//       }
+//     }
+
+//     stage('Terraform Plan') {
+//       steps {
+//         sh '''
+//           echo "====================================="
+//           echo "Generating Terraform Plan..."
+//           terraform plan -out=tfplan
+//         '''
+//       }
+//     }
+
+//     stage('Approve Apply') {
+//       steps {
+//         script {
+//           try {          
+//             timeout(time: 30, unit: 'MINUTES') {
+//               input message: 'Approve Terraform Apply?'
+//             }
+//           } catch (err) {
+//             // Timeout or abort — mark as aborted, not failed
+//             currentBuild.result = 'ABORTED'
+//             error('Approval timed out or was aborted')
+//           }
+//         }
+//       }
+//     }
+ 
+
+//     stage('Terraform Apply') {
+//       steps {
+//         sh '''
+//           echo "====================================="
+//           echo "Applying Terraform Changes..."
+//           terraform apply -auto-approve tfplan
+//         '''
+//       }
+//     }
+
+//     stage('Terraform Outputs') {
+//       steps {
+//         sh '''
+//           echo "====================================="
+//           echo "Terraform Outputs:"
+//           terraform output || true
+//         '''
+//       }
+//     }
+//   }
+
+//   post {
+
+//     success {
+//       echo '====================================='
+//       echo 'Terraform infrastructure provisioned successfully.'
+//     }
+
+//     failure {
+//       echo '====================================='
+//       echo 'Terraform pipeline failed.'
+//     }
+
+//     always {
+//       archiveArtifacts artifacts: 'tfplan', allowEmptyArchive: true
+
+//       sh '''
+//         echo "====================================="
+//         echo "Terraform State List:"
+//         terraform state list || true
+//       '''
+//     }
+//   }
+// }
+
+
+
 pipeline {
   agent any
 
@@ -5,34 +173,35 @@ pipeline {
     timestamps()
     disableConcurrentBuilds()
     buildDiscarder(logRotator(numToKeepStr: '20'))
+    timeout(time: 60, unit: 'MINUTES')
   }
 
   environment {
-    TF_IN_AUTOMATION = 'true'
-    TF_INPUT         = 'false'
+    TF_IN_AUTOMATION   = 'true'
+    TF_INPUT           = 'false'
+    GOOGLE_CREDENTIALS = credentials('gcp-sa-key')
   }
 
   stages {
 
     stage('Checkout') {
-      steps {
-        checkout scm
-      }
+      steps { checkout scm }
     }
 
     stage('Verify Environment') {
       steps {
         sh '''
           echo "====================================="
-          echo "Current Working Directory:"
+          echo "Verifying build environment..."
+          echo "Working Directory:"
           pwd
 
           echo "====================================="
-          echo "Repository Files:"
+          echo "Repository Contents:"
           ls -la
 
           echo "====================================="
-          echo "Terraform Files:"
+          echo "Terraform Configuration Files:"
           ls -la *.tf || true
         '''
       }
@@ -42,11 +211,13 @@ pipeline {
       steps {
         sh '''
           echo "====================================="
-          echo "Active GCP Account:"
+          echo "Verifying GCP authentication..."
+
+          echo "Active GCP Service Account:"
           gcloud auth list --filter=status:ACTIVE --format="value(account)"
 
           echo "====================================="
-          echo "Current GCP Project:"
+          echo "Active GCP Project:"
           gcloud config get-value project || true
         '''
       }
@@ -56,7 +227,7 @@ pipeline {
       steps {
         sh '''
           echo "====================================="
-          echo "Terraform Version:"
+          echo "Fetching Terraform version information..."
           terraform version
         '''
       }
@@ -66,8 +237,9 @@ pipeline {
       steps {
         sh '''
           echo "====================================="
-          echo "Checking Terraform Formatting..."
-          terraform fmt -recursive
+          echo "Running Terraform format check..."
+          terraform fmt -recursive -check
+          echo "Format check passed successfully."
         '''
       }
     }
@@ -76,8 +248,9 @@ pipeline {
       steps {
         sh '''
           echo "====================================="
-          echo "Initializing Terraform..."
+          echo "Initializing Terraform working directory..."
           terraform init -reconfigure
+          echo "Terraform initialization complete."
         '''
       }
     }
@@ -86,8 +259,9 @@ pipeline {
       steps {
         sh '''
           echo "====================================="
-          echo "Validating Terraform..."
+          echo "Validating Terraform configuration files..."
           terraform validate
+          echo "Terraform validation passed successfully."
         '''
       }
     }
@@ -96,27 +270,38 @@ pipeline {
       steps {
         sh '''
           echo "====================================="
-          echo "Generating Terraform Plan..."
+          echo "Generating Terraform execution plan..."
           terraform plan -out=tfplan
+          echo "Terraform plan generated successfully. Review the plan before proceeding."
         '''
       }
     }
 
-    // Uncomment for manual approval in future
-    /*
     stage('Approve Apply') {
       steps {
-        input message: 'Approve Terraform Apply?'
+        script {
+          try {
+            timeout(time: 30, unit: 'MINUTES') {
+              input message: 'Review the Terraform plan above. Approve to proceed with infrastructure provisioning.',
+                    ok: 'Approve & Deploy'
+            }
+          } catch (err) {
+            currentBuild.result = 'ABORTED'
+            error('Deployment approval was not received within the allotted time. Pipeline aborted.')
+          }
+        }
       }
     }
-    */
 
     stage('Terraform Apply') {
       steps {
         sh '''
           echo "====================================="
-          echo "Applying Terraform Changes..."
+          echo "Applying Terraform configuration..."
+          echo "Provisioning GCP infrastructure resources..."
           terraform apply -auto-approve tfplan
+          echo "====================================="
+          echo "Infrastructure provisioned successfully."
         '''
       }
     }
@@ -125,33 +310,95 @@ pipeline {
       steps {
         sh '''
           echo "====================================="
-          echo "Terraform Outputs:"
-          terraform output || true
+          echo "Fetching Terraform output values..."
+          terraform output -json || true
         '''
       }
     }
+
+    stage('Wait Before Destroy') {
+      steps {
+        script {
+          echo "====================================="
+          echo "Infrastructure provisioning complete."
+          echo "Scheduled auto-destroy will commence in 30 minutes."
+          echo "All resources created by this pipeline will be permanently deleted."
+          sleep(time: 30, unit: 'MINUTES')
+        }
+      }
+    }
+
+    stage('Approve Destroy') {
+      steps {
+        script {
+          try {
+            timeout(time: 10, unit: 'MINUTES') {
+              input message: 'WARNING: All infrastructure resources created by this pipeline will be permanently destroyed. This action is irreversible. Confirm to proceed.',
+                    ok: 'Confirm Destroy'
+            }
+          } catch (err) {
+            currentBuild.result = 'ABORTED'
+            echo "====================================="
+            echo "Destroy approval not received. Infrastructure resources are still active."
+            echo "Please destroy resources manually to avoid unnecessary costs."
+            error('Destroy stage was not approved. Pipeline aborted.')
+          }
+        }
+      }
+    }
+
+    stage('Terraform Destroy') {
+      steps {
+        sh '''
+          echo "====================================="
+          echo "Initiating Terraform destroy..."
+          echo "Decommissioning all provisioned GCP infrastructure resources..."
+          terraform destroy -auto-approve
+          echo "====================================="
+          echo "All infrastructure resources have been successfully destroyed."
+        '''
+      }
+    }
+
   }
 
   post {
 
     success {
       echo '====================================='
-      echo 'Terraform infrastructure provisioned successfully.'
+      echo 'Pipeline executed successfully.'
+      echo 'All infrastructure resources have been provisioned and decommissioned as scheduled.'
     }
 
     failure {
       echo '====================================='
-      echo 'Terraform pipeline failed.'
+      echo 'Pipeline execution failed.'
+      echo 'Infrastructure resources will be deleted from GCP.'
+      sh 'terraform destroy -auto-approve || true' 
+    }
+
+    aborted {
+      echo '====================================='
+      echo 'Pipeline was aborted.'
+      echo 'Infrastructure resources may still be active on GCP.'
+      echo 'Please verify the resource state and perform manual cleanup if required.'
     }
 
     always {
+      echo '====================================='
+      echo 'Archiving build artifacts...'
       archiveArtifacts artifacts: 'tfplan', allowEmptyArchive: true
 
       sh '''
         echo "====================================="
-        echo "Terraform State List:"
+        echo "Current Terraform State Summary:"
         terraform state list || true
+        echo "====================================="
+        echo "Build post-processing complete. Cleaning workspace..."
       '''
+
+      cleanWs()
     }
+
   }
 }
