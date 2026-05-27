@@ -2,15 +2,15 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 
 metadata:
-  name: ${{ values.repo_name }}
+  name: ${{ values.app_name }}
   title: ${{ values.environment }} GCP Infrastructure
   description: Terraform code for provisioning GCP infrastructure on Google Cloud
 
   annotations:
-    github.com/project-slug: BackstageSSPPoC/${{ values.repo_name }}                       #Replace with your own GitHub Organization's name here at Line no. 10
+    github.com/project-slug: BackstageSSPPoC/${{ values.app_name }}                       #Replace with your own GitHub Organization's name here at Line no. 10
     backstage.io/techdocs-ref: dir:.
-    backstage.io/source-location: url:https://github.com/BackstageSSPPoC/${{ values.repo_name }}                   #Replace with your own GitHub Organization's name here at Line no. 12
-    jenkins.io/job-full-name: Backstage_SSP_PoC/${{ values.repo_name }}/main                  #Replace with your own Jenkins Organization's name here at Line no. 13
+    backstage.io/source-location: url:https://github.com/BackstageSSPPoC/${{ values.app_name }}                   #Replace with your own GitHub Organization's name here at Line no. 12
+    jenkins.io/job-full-name: Backstage_SSP_PoC/${{ values.app_name }}/main                  #Replace with your own Jenkins Organization's name here at Line no. 13
 
   tags:
     - gcp
@@ -33,7 +33,7 @@ metadata:
       title: VPC Networks
       icon: dashboard
 
-    - url: https://github.com/BackstageSSPPoC/${{ values.repo_name }}                  #Replace with your own GitHub Organization's name here at Line no. 36
+    - url: https://github.com/BackstageSSPPoC/${{ values.app_name }}                  #Replace with your own GitHub Organization's name here at Line no. 36
       title: GitHub Repository
       icon: github
 
