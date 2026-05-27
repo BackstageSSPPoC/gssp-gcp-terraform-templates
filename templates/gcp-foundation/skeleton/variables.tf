@@ -7,6 +7,11 @@ variable "project_id" {
   type        = string
 }
 
+variable "app_name" {
+  description = "Unique application name"
+  type        = string
+}
+
 variable "environment" {
   description = "Deployment environment"
   type        = string
