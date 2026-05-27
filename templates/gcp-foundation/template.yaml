@@ -26,7 +26,6 @@ spec:
         - zone
         - bucket_name
         - app_name
-        - repo_name
         - vm_name
         - machine_type
 
@@ -41,7 +40,7 @@ spec:
           title: GCP Project ID
           description: GCP project where services will be created
 
-       app_name:                               
+        app_name:                               
           type: string
           title: Application Name
           description: Unique application name (used to avoid resource name conflicts across projects)
@@ -151,12 +150,6 @@ spec:
         ########################################
         # GITHUB REPOSITORY
         ########################################
-
-        repo_name:
-          type: string
-          title: GitHub Repository Name
-          description: Repository to create for Terraform code
-          default: gcp-infrastructure
 
   steps:
     - id: fetch-base
