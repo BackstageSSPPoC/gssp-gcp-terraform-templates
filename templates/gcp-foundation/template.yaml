@@ -25,6 +25,7 @@ spec:
         - region
         - zone
         - bucket_name
+        - app_name
         - repo_name
         - vm_name
         - machine_type
@@ -184,13 +185,13 @@ spec:
           vm_name: ${{ parameters.vm_name }}
           machine_type: ${{ parameters.machine_type }}
 
-          repo_name: ${{ parameters.repo_name }}
+          repo_name: ${{ parameters.app_name }}
 
     - id: publish
       name: Publish to GitHub
       action: publish:github
       input:
-        repoUrl: github.com?owner=BackstageSSPPoC&repo=${{ parameters.repo_name }}
+        repoUrl: github.com?owner=BackstageSSPPoC&repo=${{ parameters.app_name }}
         defaultBranch: main
         description: Terraform code for provisioning GCP infrastructure
 
