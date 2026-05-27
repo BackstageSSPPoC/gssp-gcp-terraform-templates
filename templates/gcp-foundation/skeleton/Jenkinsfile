@@ -371,34 +371,40 @@ pipeline {
     }
 
     failure {
-      echo '====================================='
-      echo 'Pipeline execution failed.'
-      echo 'Infrastructure resources will be deleted from GCP.'
-      sh 'terraform destroy -auto-approve || true' 
+      // ✅ node block ke andar rakho sh step ko
+      node('') {
+        echo '====================================='
+        echo 'Pipeline execution failed.'
+        echo 'Infrastructure resources may still be active on GCP.'
+        echo 'Please review the logs and perform manual cleanup using: terraform destroy'
+      }
     }
 
     aborted {
-      echo '====================================='
-      echo 'Pipeline was aborted.'
-      echo 'Infrastructure resources may still be active on GCP.'
-      echo 'Please verify the resource state and perform manual cleanup if required.'
+      node('') {
+        echo '====================================='
+        echo 'Pipeline was aborted.'
+        echo 'Infrastructure resources may still be active on GCP.'
+        echo 'Please verify the resource state and perform manual cleanup if required.'
+      }
     }
 
     always {
-      echo '====================================='
-      echo 'Archiving build artifacts...'
-      archiveArtifacts artifacts: 'tfplan', allowEmptyArchive: true
+      node('') {
+        echo '====================================='
+        echo 'Archiving build artifacts...'
+        archiveArtifacts artifacts: 'tfplan', allowEmptyArchive: true
 
-      sh '''
-        echo "====================================="
-        echo "Current Terraform State Summary:"
-        terraform state list || true
-        echo "====================================="
-        echo "Build post-processing complete. Cleaning workspace..."
-      '''
+        sh '''
+          echo "====================================="
+          echo "Current Terraform State Summary:"
+          terraform state list || true
+          echo "====================================="
+          echo "Build post-processing complete. Cleaning workspace..."
+        '''
 
-      cleanWs()
+        cleanWs()
+      }
     }
-
   }
 }
