@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
     bucket = "gssp-tfstate-poc-2026"
-    prefix = "${{ values.environment }}/gcp-infrastructure/${{ values.repo_name }}"
+    prefix = "${{ values.environment }}/gcp-infrastructure/${{ values.app_name }}"
   }
 }
